@@ -209,7 +209,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         if self.sales_dialog.exec_() == QtWidgets.QDialog.Accepted:
             pass
 
-
     def setupUi(self):
         width, height = pyautogui.size()
         self.w = width - 200
@@ -541,8 +540,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     # def msgButtonClick(self, i):
     #     pass
-
-
 
 class Ui_LoginWindow(QtWidgets.QMainWindow):
 
