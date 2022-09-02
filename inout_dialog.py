@@ -356,7 +356,6 @@ class Ui_inoutDialog(QtWidgets.QDialog):
         self.txtBusqueda.keyPressEvent = self.txtbusquedaAcept
 
         # -----------  lbl final ware configuration  -----------
-
         self.lblTitle = QtWidgets.QLabel(self.frame_2)
         self.lblTitle.setGeometry(QtCore.QRect(450, 19, 361, 31))
         font = QtGui.QFont()
