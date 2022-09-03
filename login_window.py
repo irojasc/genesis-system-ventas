@@ -206,8 +206,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.isupdateWare = False
 
     def open_salesWindow(self):
-        if self.sales_dialog.exec_() == QtWidgets.QDialog.Accepted:
-            pass
+        self.sales_dialog.widget.show()
 
     def setupUi(self):
         width, height = pyautogui.size()
@@ -361,6 +360,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         k = 0
         while(enable_datetime):
             self.date_label.setText(datetime.now().strftime("%H:%M %d/%m/%Y"))
+            if self.sales_dialog.widget.isVisible():
+                print("ventana de ventas abierto")
+            elif not self.sales_dialog.widget.isVisible():
+                print("ventana de ventas cerrado")
             if k < 600:
                 time.sleep(0.5)
                 k += 1
