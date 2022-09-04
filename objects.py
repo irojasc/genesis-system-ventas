@@ -40,6 +40,13 @@ class daily_sale:
 		self.date = date
 		self.total_ = total_
 
+class saleItem:
+	def __init__(self, objBook = None, cantWare = 0):
+		self.objBook = objBook
+		self.cantWare = cantWare
+
+
+
 class ware_book:
 	#def __init__(self,wares = None, objBook = None, ware_quantity = [], ware_location = [], permissions = []):
 	def __init__(self, objBook=None, wares = None, data = None):
