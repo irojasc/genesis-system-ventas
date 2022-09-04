@@ -1,5 +1,5 @@
 import mysql.connector
-from objects import user, ware_book, book, ware_, transferr
+from objects import user, ware_book, book, ware_, transferr, saleItem
 from datetime import datetime
 from PyQt5.QtWidgets import QMessageBox
 
@@ -150,8 +150,10 @@ class ware_gestor:
 						   "genesisDB.books.editorial, genesisDB.books.supplierID, genesisDB.books.pv, "
 
 			for i in wares[1]:
+				print(i.cod, i.dir)
 				initial_text = initial_text	 + "genesisDB.ware_books.cant_" + str(i.cod) + ", genesisDB.ware_books.ubic_" + str(i.cod) + ", genesisDB.ware_books.isok_" + str(i.cod) + ","
 			initial_text = initial_text.rstrip(initial_text[-1]) + " from genesisDB.ware_books inner join genesisDB.books on genesisDB.ware_books.cod_book = genesisDB.books.cod;"
+			print(initial_text)
 			query = (initial_text)
 			# -----------  carga data de libros  -----------
 			self.cursor.execute(query)
@@ -176,6 +178,35 @@ class ware_gestor:
 
 		except:
 			print("no pudo cargar libros almacen de DB")
+			self.disconnect_db()
+
+	def load_items(self, currentWare = None):
+		self.ware_list.clear()
+		self.connect_db()
+		try:
+			query = ("select genesisDB.ware_books.cod_book, genesisDB.books.isbn, genesisDB.books.name, genesisDB.books.autor, " \
+						   "genesisDB.books.editorial, genesisDB.books.pv, genesisDB.ware_books.cant_" + currentWare +" " \
+						   "from genesisDB.ware_books inner join genesisDB.books on genesisDB.ware_books.cod_book = genesisDB.books.cod;")
+			
+			# -----------  carga data de libros  -----------
+			self.cursor.execute(query)
+			for params in self.cursor:
+				values = self.None_Type(tuple(params))
+				# values: [0]: codbook, [1]: isbn, [2]: name, [3]: autor, [4]: editorial, [5]: pv, [6]: cant_currentWare
+				dataTup = (values[0], values[1], values[2], values[3], values[4], " ", values[5])
+				objLibro = book(dataTup)
+				item = saleItem(objLibro, values[6])
+				self.ware_list.append(item)
+
+		# -----------  cerrar conexion db  -----------
+			self.disconnect_db()
+		# -----------  eliminar los codigos de almacen que no tienen objeto libro  -----------
+		# for i in ware_list:
+		#	if(type(i.book) != str):
+		#		self.ware_list.append(i)
+
+		except mysql.connector.Error as err:
+			print("Something went wrong: {}".format(err))
 			self.disconnect_db()
 
 
