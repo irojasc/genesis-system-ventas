@@ -1,21 +1,34 @@
 class user:
-	def __init__(self, user = "", passwd = "", name = "", doc = "", phone = "", enabled = False):
-		self.user = user
+	def __init__(self, user = "", passwd = "", name = "", doc = "", phone = "", enabled = False, purchaseEnabled = False):
+		self.user = user #este es el codigo
 		self.passwd = passwd
 		self.name = name
 		self.doc = doc
 		self.phone = phone
 		self.enabled = enabled
+		self.purchaseEnabled = purchaseEnabled
 
-class supplier:
-	def __init__(self, id, name, admin, phone, direction, mail):
+class customer:
+	def __init__(self, id = None, name = "", doc = "", tel = "", dir = "", gen = "", sex = 0):
 		self.id = id
 		self.name = name
-		self.register = register
-		self.admin = admin
+		self.doc = doc
+		self.tel = tel
+		self.dir = dir
+		self.gen = gen
+		self.sex = sex
+
+class supplier:
+	def __init__(self, cod: str, main_doc: str, name: str, name_admin: str, doc_admin: str, phone: str, direction: str, mail: str, tipo: str):
+		self.cod = cod
+		self.main_doc = main_doc
+		self.name = name
+		self.name_admim = name_admin
+		self.doc_admin = doc_admin
 		self.phone = phone
 		self.direction = direction
 		self.mail = mail
+		self.tipo = tipo
 
 class gender:
 	def __init__(self, id, name):
@@ -45,7 +58,25 @@ class saleItem:
 		self.objBook = objBook
 		self.cantWare = cantWare
 
-
+class saleDetailsItem:
+	def __init__(self, id_, id, codbook, isbn, title, customer, doc_, user, cant, credit = False, receipt = "", total = 0.0):
+		self.id_ = id_ #int primary
+		self.id = id #int day
+		self.codbook = codbook
+		self.isbn = isbn
+		self.title = title  # string
+		self.doc_ = doc_
+		self.customer = customer
+		self.user = user #string
+		self.cant = cant #int
+		self.credit = bool(credit) #bool
+		if receipt == None:
+			self.receipt = "" #string
+			self.block = False
+		else:
+			self.receipt = receipt
+			self.block = True
+		self.total = total #float
 
 class ware_book:
 	#def __init__(self,wares = None, objBook = None, ware_quantity = [], ware_location = [], permissions = []):
@@ -68,7 +99,6 @@ class ware_book:
 			                 "cant_" + ware_4: int(data[16]),
 							 "ubic_" + ware_4: str(data[17]),
 							 "isok_" + ware_4: bool(data[18])}
-
 
 class transferr:
 	def __init__(self, cod = None, s_point = "", f_point = "", s_date = "", f_date = None, emiter = "", receiver = None, state = "", description = "", items= []):
@@ -110,6 +140,11 @@ class ware_:
 		self.dir = dir
 		self.enabled = enabled
 		self.toolTip = toolTip
+
+# class compra:
+# 	def __init__(self, ):
+# 		self.
+
 
 
 
