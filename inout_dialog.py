@@ -33,7 +33,6 @@ class Ui_inoutDialog(QtWidgets.QDialog):
         self.setupUi()
         self.init_condition()
 
-
     def init_condition(self):
         # -----------  set item conditions  -----------
         self.main_table.clear()
@@ -53,6 +52,7 @@ class Ui_inoutDialog(QtWidgets.QDialog):
         self.searchList.clear()
 
     def add_item(self, cod = ""):
+        highlightRow = 0
         #main_table es lista para manejar los datos qtablewidget
         #index_ igual a None si no ecuentra coincidcnias
         index_ = next((index for (index, d) in enumerate(self.mainList) if d.objBook.cod == cod), None)
@@ -61,21 +61,23 @@ class Ui_inoutDialog(QtWidgets.QDialog):
             data = {"cod": self.mainList[index_].objBook.cod, "isbn": self.mainList[index_].objBook.isbn, "name": self.mainList[index_].objBook.name, "cantidad": 1,
                     "ubic_" + self.ownWares[0]: self.mainList[index_].almacen_data["ubic_" + self.ownWares[0]]}
             self.main_table.append(data)
-            self.updateTotalItems()
+            highlightRow = 0
+            # self.updateTotalItems()
         else:
             #_tmpObject = copy.copy(object_)
             #data = {"cod": _tmpObject.book.cod, "isbn": _tmpObject.book.isbn, "name": _tmpObject.book.name, "cantidad": _tmpObject.almacen_quantity[0]}
-            for item in self.main_table:
+            for pos, item in enumerate(self.main_table):
                 if item["cod"] == cod:
                     flag = True
-                    item["cantidad"] += 1 
+                    item["cantidad"] += 1
+                    highlightRow = pos
             if flag == False:
                 data = {"cod": self.mainList[index_].objBook.cod, "isbn": self.mainList[index_].objBook.isbn,
                         "name": self.mainList[index_].objBook.name, "cantidad": 1, "ubic_" + self.ownWares[0]: self.mainList[index_].almacen_data["ubic_" + self.ownWares[0]]}
                 self.main_table.append(data)
+                highlightRow = len(self.main_table) - 1
         self.update_table()
-        if len(self.main_table) == 1:
-            self.in_tableWidget.setCurrentCell(0, 0)
+        self.in_tableWidget.setCurrentCell(highlightRow, 0)
         self.updateTotalItems()
 
     def update_table(self):
@@ -111,7 +113,8 @@ class Ui_inoutDialog(QtWidgets.QDialog):
                 self.add_item(self.searchList.item(0).text().split(" ")[0].strip())
                 self.txtBusqueda.clear()
             elif self.searchList.count() > 1:
-                self.add_item(self.searchList.item(self.searchList.currentRow()).text().split(" ")[0].strip())
+                # self.add_item(self.searchList.item(self.searchList.currentRow()).text().split(" ")[0].strip())
+                pass
 
         if (event.key() == QtCore.Qt.Key_Return or event.key() == QtCore.Qt.Key_Enter) and self.cmbBusqueda.currentText() != "isbn" and self.cmbBusqueda.currentIndex() != -1:
             if self.searchList.count() > 0:
@@ -245,9 +248,6 @@ class Ui_inoutDialog(QtWidgets.QDialog):
                 self.in_tableWidget.item(row, 3).setText(str(self.main_table[row]["cantidad"]))
             self.updateTotalItems()
 
-    # def doubleClickItem(self, item):
-    #     pass
-
     def updateTotalItems(self):
         self.cantItems = 0
         if len(self.main_table) == 0:
@@ -256,7 +256,6 @@ class Ui_inoutDialog(QtWidgets.QDialog):
             for i in self.main_table:
                 self.cantItems += i["cantidad"]
         self.lblTitle_cant.setText("Items: " + str(self.cantItems))
-
 
     def aceptarEvent(self,event):
         if event.button() == QtCore.Qt.LeftButton:
@@ -271,12 +270,12 @@ class Ui_inoutDialog(QtWidgets.QDialog):
                 index = next((index for (index, d) in enumerate(self.ownUsers[1]) if d.passwd == text_), None)
                 if index != None and validation_:
                     if self.trasferGest.createTransfer(self.main_table, (self.ownWares[0],self.finalWare), self.ownUsers[1][index].user):
-                        ret = QMessageBox.question(self, 'Alerta', "Operación exitosa", QMessageBox.Ok, QMessageBox.Ok)
+                        QMessageBox.question(self, 'Alerta', "Operación exitosa", QMessageBox.Ok, QMessageBox.Ok)
                         self.generalFlag = True
                         self.accept()
                         event.accept()
                     else:
-                        ret = QMessageBox.information(self, 'Aviso', "No se pudo conectar con la base de datos, intente mas tarde")
+                        QMessageBox.information(self, 'Aviso', "No se pudo conectar con la base de datos, intente mas tarde")
                         event.ignore()
 
                 elif index == None and validation_:
@@ -350,8 +349,6 @@ class Ui_inoutDialog(QtWidgets.QDialog):
         self.txtBusqueda.setStyleSheet("background-color: rgb(248, 248, 248);")
         self.txtBusqueda.setClearButtonEnabled(True)
         self.txtBusqueda.setObjectName("txtBusqueda")
-        #self.txtBusqueda.keyPressEvent = self.keyPressed_
-        #self.txtBusqueda.mousePressEvent = self.holaMundo
         self.txtBusqueda.textChanged.connect(self.txtBusquedaChanged)
         self.txtBusqueda.keyPressEvent = self.txtbusquedaAcept
 
@@ -380,6 +377,7 @@ class Ui_inoutDialog(QtWidgets.QDialog):
         self.searchList.setObjectName("searchList")
         self.searchList.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.searchList.keyPressEvent = self.listSearchKey
+
         # -----------  mid-frame configuration  -----------
         self.mid_frame = QtWidgets.QFrame(self)
         self.mid_frame.setGeometry(QtCore.QRect(0, 130, 640, 5)) #width 640, height 65
@@ -641,5 +639,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     Dialog = QDialog()
     ui = Ui_inoutDialog(Dialog)
-    #ui.show_window()
+    # ui.show_window()
     sys.exit(app.exec_())
