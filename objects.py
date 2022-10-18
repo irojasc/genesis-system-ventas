@@ -23,7 +23,7 @@ class supplier:
 		self.cod = cod
 		self.main_doc = main_doc
 		self.name = name
-		self.name_admim = name_admin
+		self.name_admin = name_admin
 		self.doc_admin = doc_admin
 		self.phone = phone
 		self.direction = direction
