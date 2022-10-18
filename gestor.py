@@ -408,12 +408,22 @@ class users_gestor:
 
 	def fill_users(self):
 		self.connectDB()
-		query = ("select * from genesisDB.users;")
+		query = ("CREATE TEMPORARY TABLE genesisDB.tmp "
+				 "AS select * from genesisDB.users "
+				 "inner join genesisDB.user_flags "
+				 "on genesisDB.users.level = genesisDB.user_flags.lvl;")
+		query_1 = ("ALTER TABLE genesisDB.tmp DROP COLUMN id, DROP COLUMN level, DROP COLUMN lvl;")
+		query_2 = ("SELECT * FROM genesisDB.tmp;")
 		try:
 			self.cursor.execute(query)
-			#param2: usr, param3: pssswd, param4: name, param5: doc, param6: phone, param7: enabled
-			for (param1, param2, param3, param4, param5, param6, param7, param8) in self.cursor:
-				objUser = user(param2, param3, param4, param5, param6, bool(param7), bool(param8))
+			self.cursor.execute(query_1)
+			self.cursor.execute(query_2)
+			#param1, param2, param3, param4, param5, param6 -> datos propios (usr, pwd, name, doc, phone, enabled)
+			#param7, param8, param9, param10, param11, param12 -> permisos (vender, comprar, registrar compra,
+			# verProve, comparar, transferir)
+			for (par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12) in self.cursor:
+				objUser = user(par1, par2, par3, par4, par5, bool(par6), (bool(par7), bool(par8), bool(par9), bool(par10),
+																		  bool(par11), bool(par12)))
 				self.users.append(objUser)
 			self.disconnectDB()
 		except:
@@ -423,8 +433,8 @@ class users_gestor:
 	def check_login(self, name, passwd):
 		for i in self.users:
 			if i.user == name and i.passwd == passwd:
-				return True, (i.user, self.users, i.enabled, i.purchaseEnabled)
-		return False, (i.user, self.users, False)
+				return True, (i.user, self.users, i.enabled, i.flags)
+		return False, (i.user, self.users, False, None)
 
 class customer_gestor:
 	def __init__(self, flag = False):
