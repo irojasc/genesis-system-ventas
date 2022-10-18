@@ -62,7 +62,6 @@ class Ui_inoutDialog(QtWidgets.QDialog):
                     "ubic_" + self.ownWares[0]: self.mainList[index_].almacen_data["ubic_" + self.ownWares[0]]}
             self.main_table.append(data)
             highlightRow = 0
-            # self.updateTotalItems()
         else:
             #_tmpObject = copy.copy(object_)
             #data = {"cod": _tmpObject.book.cod, "isbn": _tmpObject.book.isbn, "name": _tmpObject.book.name, "cantidad": _tmpObject.almacen_quantity[0]}
