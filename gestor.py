@@ -1,5 +1,5 @@
 import mysql.connector
-from objects import user, ware_book, book, ware_, transferr, saleItem
+from objects import user, customer, ware_book, book, ware_, transferr, saleItem, saleDetailsItem, supplier
 from datetime import datetime
 from PyQt5.QtWidgets import QMessageBox
 
@@ -49,11 +49,12 @@ class wares_gestor:
 			vect = file.readlines()
 			self.abrev = vect[0].split(":")[1].strip('\n')
 			ware_name = vect[1].split(":")[1].strip('\n')
+			ware_inputLoc = bool(vect[1].split(":")[2].strip('\n'))
 			for i in self.wares:
 				if i.cod == self.abrev:
 					file.close()
 					self.sort_ware()
-					return True, (i.cod, self.wares, (i.enabled, i.toolTip)), ware_name
+					return True, (i.cod, self.wares, (i.enabled, i.toolTip, ware_inputLoc)), ware_name
 			file.close()
 			return False, None, "UNKNOWN"
 		except:
@@ -150,10 +151,8 @@ class ware_gestor:
 						   "genesisDB.books.editorial, genesisDB.books.supplierID, genesisDB.books.pv, "
 
 			for i in wares[1]:
-				print(i.cod, i.dir)
 				initial_text = initial_text	 + "genesisDB.ware_books.cant_" + str(i.cod) + ", genesisDB.ware_books.ubic_" + str(i.cod) + ", genesisDB.ware_books.isok_" + str(i.cod) + ","
 			initial_text = initial_text.rstrip(initial_text[-1]) + " from genesisDB.ware_books inner join genesisDB.books on genesisDB.ware_books.cod_book = genesisDB.books.cod;"
-			print(initial_text)
 			query = (initial_text)
 			# -----------  carga data de libros  -----------
 			self.cursor.execute(query)
@@ -209,7 +208,6 @@ class ware_gestor:
 			print("Something went wrong: {}".format(err))
 			self.disconnect_db()
 
-
 class transfer:
 	def __init__(self):
 		pass
@@ -253,8 +251,6 @@ class transfer:
 			print("Something went wrong: {}".format(err))
 			self.disconnect_db()
 			return False
-
-
 
 class notifications:
 	def __init__(self):
@@ -386,10 +382,6 @@ class notifications:
 			self.disconnect_db()
 			return False, None
 
-
-
-
-
 class users_gestor:
 	def __init__(self):
 		self.users = []
@@ -398,7 +390,6 @@ class users_gestor:
 		#	self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
 		#	self.cursor = self.mydb.cursor()
 		#except:
-		#	print("No se puede conectar a genesisDB")
 		#	self.cursor.close()
 		#	self.mydb.close()
 
@@ -417,14 +408,12 @@ class users_gestor:
 
 	def fill_users(self):
 		self.connectDB()
-		query = ("use genesisDB;")
-		query1 = ("select * from users;")
+		query = ("select * from genesisDB.users;")
 		try:
 			self.cursor.execute(query)
-			self.cursor.execute(query1)
 			#param2: usr, param3: pssswd, param4: name, param5: doc, param6: phone, param7: enabled
-			for (param1, param2, param3, param4, param5, param6, param7) in self.cursor:
-				objUser = user(param2, param3, param4, param5, param6, bool(param7))
+			for (param1, param2, param3, param4, param5, param6, param7, param8) in self.cursor:
+				objUser = user(param2, param3, param4, param5, param6, bool(param7), bool(param8))
 				self.users.append(objUser)
 			self.disconnectDB()
 		except:
@@ -434,16 +423,198 @@ class users_gestor:
 	def check_login(self, name, passwd):
 		for i in self.users:
 			if i.user == name and i.passwd == passwd:
-				return True, (i.user, self.users, i.enabled)
+				return True, (i.user, self.users, i.enabled, i.purchaseEnabled)
 		return False, (i.user, self.users, False)
+
+class customer_gestor:
+	def __init__(self, flag = False):
+		if not flag:
+			self.Customers = []
+
+	def connectDB(self):
+		try:
+			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+			self.cursor = self.mydb.cursor()
+		except:
+			print("No se puede conectar a genesisDB")
+			self.cursor.close()
+			self.mydb.close()
+
+	def disconnectDB(self):
+		self.cursor.close()
+		self.mydb.close()
+
+	def fill_customers(self):
+		self.Customers.clear()
+		self.connectDB()
+		query = ("select * from genesisDB.customers;")
+		try:
+			self.cursor.execute(query)
+			#param1: id, param2: name, param3: doc_, param4: tel_, param5: dir, param6: gen, param7: sex
+			for (param1, param2, param3, param4, param5, param6, param7) in self.cursor:
+				objCustomer = customer(param1, param2, str(param3), str(param4), str(param5), str(param6), param7)
+				self.Customers.append(objCustomer)
+			self.disconnectDB()
+
+		except mysql.connector.Error as err:
+			print("Something went wrong: {}".format(err))
+			self.disconnectDB()
+
+	def addCustomer(self, name: str, doc: str, phone: str):
+
+		try:
+			self.connectDB()
+			query = ("insert into genesisDB.customers (name_, doc_, tel_) values ('" + name + "', '" + doc + "' "
+						", '" + phone + "');")
+			self.cursor.execute(query)
+			self.mydb.commit()
+			self.disconnectDB()
+			return True
+		except mysql.connector.Error as err:
+			print("Something went wrong: {}".format(err))
+			self.disconnectDB()
+			return False
+
+class sales_gestor:
+	def __init__(self, condition = False):
+		if condition:
+			self.sales = []
+		else:
+			pass
+	def connectDB(self):
+		try:
+			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+			self.cursor = self.mydb.cursor()
+		except:
+			print("No se puede conectar a genesisDB")
+			self.cursor.close()
+			self.mydb.close()
+	def disconnectDB(self):
+		self.cursor.close()
+		self.mydb.close()
+
+	def loadSalesDetails(self, currentWare = "", date = ""):
+		self.sales.clear()
+		self.connectDB()
+		query = ("select id_,genesisDB.salesDetails.id,cod,isbn,name,name_,doc_,usr_,cant,genesisDB.salesDetails.credit_,receipt_,total "
+				 "from genesisDB.salesDetails "
+				 "inner join genesisDB.books on genesisDB.salesDetails.codBook = genesisDB.books.cod "
+				 "inner join genesisDB.customers on genesisDB.salesDetails.cust_ = genesisDB.customers.id "
+				 "inner join genesisDB.sales on genesisDB.salesDetails.id_sales = genesisDB.sales.id "
+				 "where date_ = '" + date + "' and ware_ = '" + currentWare + "' order by id asc;")
+		try:
+			self.cursor.execute(query)
+			##param6: nombre de usuario, param7: doc
+			for (param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12) in self.cursor:
+				objDetailItems = saleDetailsItem(param1, param2, param3, str(param4), param5, param6, str(param7), param8, param9, param10, param11, float(param12))
+				self.sales.append(objDetailItems)
+			self.disconnectDB()
+		except mysql.connector.Error as err:
+			print("Something went wrong: {}".format(err))
+			self.disconnectDB()
+
+	def addSale(self, currentDate = None, List = None, currentWare = None, idCustomer = None, User = None, val = False):
+		self.connectDB()
+		query = ("select max(genesisDB.salesDetails.id) from genesisDB.salesDetails left join genesisDB.sales on "
+				"genesisDB.salesDetails.id_sales = genesisDB.sales.id where date_ = '" + currentDate + "' "
+				"and ware_ = '" + currentWare + "' union select id from genesisDB.sales "
+				"where date_ = '" + currentDate + "';")
+		try:
+			self.cursor.execute(query)
+			idValues, b = self.cursor.fetchall()
+			idValues = list(idValues)
+			if idValues[0] == None and val:
+				idValues[0] = 1
+			elif idValues[0] != None and val:
+				idValues[0] = idValues[0] + 1
+			elif not val:
+				idValues[0] = 0
+
+			data_update = []
+			data = []
+			for i in List:
+				data_update.append((str(i["cantidad"]), i["cod"]))
+				data.append((str(i["id"]), str(b[0]), str(idValues[0]), currentWare, str(idCustomer), User, i["cod"],
+						 str(i["cantidad"]), str(int(i["tarjeta"])), str(i["v.final"])))
+
+			stmt_update = "update genesisDB.ware_books set cant_" + currentWare + " = cant_" + currentWare + " - %s " \
+							"where cod_book = %s"
+
+			stmt = "insert into genesisDB.salesDetails (id_, id_sales, id, ware_, cust_, usr_, codBook, cant, credit_, total) " \
+				   "values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) as t " \
+				   "on duplicate key update genesisDB.salesDetails.total = genesisDB.salesDetails.total + t.total, " \
+				   "genesisDB.salesDetails.cant = genesisDB.salesDetails.cant + t.cant"
+
+			self.cursor.executemany(stmt, data)
+			self.mydb.commit()
+
+			self.cursor.executemany(stmt_update, data_update)
+			self.mydb.commit()
+			self.disconnectDB()
+
+			return True
+		except mysql.connector.Error as err:
+			print("Something went wrong: {}".format(err))
+			self.disconnectDB()
+			return False
+
+	def changeReceipt(self, currentWare, id_, receipt = "", type = False, date = None, id = None):
+		self.connectDB()
+		if not type:
+			query = ("update genesisDB.salesDetails set receipt_ = '" + receipt + "' "
+					"where id_ = " + str(id_) + " and ware_ = '"+ currentWare +"';")
+		elif type:
+			query = ("update genesisDB.salesDetails as a "
+					 "inner join genesisDB.sales b on a.id_sales = b.id set a.receipt_ = '"+ receipt +"' "
+			"where b.date_ in ('"+ date +"') and a.id in ("+ str(id) +") and a.ware_ in ('" + currentWare + "');")
+		try:
+			self.cursor.execute(query)
+			self.mydb.commit()
+			self.disconnectDB()
+			return True
+		except mysql.connector.Error as err:
+			print("Something went wrong: {}".format(err))
+			self.disconnectDB()
+			return False
+
+class supplier_gestor:
+	def __init__(self):
+		self.suppliers = []
+	def connectDB(self):
+		try:
+			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+			self.cursor = self.mydb.cursor(buffered=True)
+		except:
+			print("No se puede conectar a genesisDB")
+			self.cursor.close()
+			self.mydb.close()
+	def disconnectDB(self):
+		self.cursor.close()
+		self.mydb.close()
+
+	def fill_suppliers(self):
+		self.suppliers.clear()
+		self.connectDB()
+		query = ("select * from genesisDB.suppliers;")
+		try:
+			self.cursor.execute(query)
+			# # param2: usr, param3: pssswd, param4: name, param5: doc, param6: phone, param7: enabled
+			for (param1, param2, param3, param4, param5, param6, param7, param8, param9) in self.cursor:
+				objSupplier = supplier(param1, param2, param3, param4, param5, param6, param7, param8, param9)
+				self.suppliers.append(objSupplier)
+			self.disconnectDB()
+		except mysql.connector.Error as err:
+			print("Something went wrong: {}".format(err))
+			print("No se puede conectar a genesisDB")
+			self.disconnectDB()
+
 
 
 class documents:
 	def __init__(self):
-		print("Hola Mundo")
-
+		pass
 	def get_PDFReport(self):
-		print("Hola Mundo")
+		passs
 
 
 

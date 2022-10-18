@@ -1,12 +1,12 @@
 class user:
-	def __init__(self, user = "", passwd = "", name = "", doc = "", phone = "", enabled = False, purchaseEnabled = False):
+	def __init__(self, user = "", passwd = "", name = "", doc = "", phone = "", enabled = False, flags = None):
 		self.user = user #este es el codigo
 		self.passwd = passwd
 		self.name = name
 		self.doc = doc
 		self.phone = phone
 		self.enabled = enabled
-		self.purchaseEnabled = purchaseEnabled
+		self.flags = flags
 
 class customer:
 	def __init__(self, id = None, name = "", doc = "", tel = "", dir = "", gen = "", sex = 0):
