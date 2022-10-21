@@ -141,12 +141,11 @@ class ware_:
 		self.enabled = enabled
 		self.toolTip = toolTip
 
-# class compra:
-# 	def __init__(self, ):
-# 		self.
-
-
-
-
-
-
+class purchase:
+	def __init__(self, id: int, user: str, inputDate: str, inputWare: str, tipo: str, serie: str):
+		self.id = id
+		self.user = user
+		self.inputDate = inputDate
+		self.inputWare = inputWare
+		self.serie = serie
+		self.type = tipo
