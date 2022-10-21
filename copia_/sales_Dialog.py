@@ -123,15 +123,9 @@ class sales_Dialog(QtWidgets.QDialog):
                 item.setFlags(flag) # not editable
             self.sales_tableWidget.setItem(row, 6, item)
 
-            if saleItem.doc_ != "00000000" and saleItem.doc_ != "11111111":
-                item = QtWidgets.QTableWidgetItem(saleItem.doc_)
-                item.setFlags(flag)
-                self.sales_tableWidget.setItem(row, 7, item)
-                self.sales_tableWidget.item(row, 7).setToolTip(saleItem.customer)
-            else:
-                item = QtWidgets.QTableWidgetItem(saleItem.customer)
-                item.setFlags(flag)
-                self.sales_tableWidget.setItem(row, 7, item)
+            item = QtWidgets.QTableWidgetItem(saleItem.customer.split(" ")[0])
+            item.setFlags(flag)
+            self.sales_tableWidget.setItem(row, 7, item)
 
             item = QtWidgets.QTableWidgetItem(str(saleItem.total))
             item.setFlags(flag)
@@ -470,9 +464,6 @@ class sales_Dialog(QtWidgets.QDialog):
             if self.cust_dialog_.saverFlag:
                 self.ui_dialog_.custGest.fill_customers()
                 self.ui_dialog_.loadCustomers()
-                docTxt = self.cust_dialog_.dni_tmp
-                index = next((index for (index, d) in enumerate(self.ui_dialog_.custGest.Customers) if d.doc == docTxt), None)
-                self.ui_dialog_.txtCliente.setText(docTxt + " | " + self.ui_dialog_.custGest.Customers[index].name)
                 self.cust_dialog_.saverFlag = False
 
     def changeIcon(self, item):
@@ -533,10 +524,8 @@ class customer_Dialog(QtWidgets.QDialog):
         self.reniecGest = ApisNetPe(API_TOKEN)
         self.saverFlag = False
         self.customerGest = customer_gestor(True)
-        self.dni_tmp = ""
 
     def init_condition(self):
-        self.dni_tmp = ""
         self.txtDoc.clear()
         self.txtName.clear()
         self.txtPhone.clear()
@@ -546,7 +535,6 @@ class customer_Dialog(QtWidgets.QDialog):
         if self.txtDoc.text() != "" and self.txtName.text() != "" and self.txtPhone.text() != "":
             if self.customerGest.addCustomer(self.txtName.text(), self.txtDoc.text(), self.txtPhone.text()):
                 QMessageBox.question(self, 'Alerta', "Cliente agregado", QMessageBox.Ok, QMessageBox.Ok)
-                self.dni_tmp = self.txtDoc.text()
                 self.saverFlag = True
                 self.gotoScreen1()
             else:
@@ -842,6 +830,9 @@ class customer_Dialog(QtWidgets.QDialog):
         self.btnBuscarUser.setAutoExclusive(True)
         self.btnBuscarUser.clicked.connect(self.buscar_User)
         self.retranslateUi()
+
+
+
 
 class user:
 	def __init__(self, user = "", passwd = "", name = "", doc = "", phone = "", enabled = False):

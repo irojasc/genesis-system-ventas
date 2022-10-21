@@ -28,50 +28,51 @@ class Ui_Qpurchase(QtWidgets.QDialog):
         self.setupUi() #configuracion de GUI
 
     def updateTable(self):
+        pass
 
-        self.purchase_table.setRowCount(1)
-
-        font = QtGui.QFont("Open Sans Semibold", pointSize = 10, weight = 60)
-
-        item = QtWidgets.QTableWidgetItem("21/10/2022")
-        item.setTextAlignment(Qt.AlignCenter)
-        item.setFont(font)
-        self.purchase_table.setItem(0, 0, item)
-
-        item = QtWidgets.QTableWidgetItem("STC")
-        item.setTextAlignment(Qt.AlignCenter)
-        item.setFont(font)
-        self.purchase_table.setItem(0, 1, item)
-
-        item = QtWidgets.QTableWidgetItem("VENTAS99")
-        item.setTextAlignment(Qt.AlignCenter)
-        item.setFont(font)
-        self.purchase_table.setItem(0, 2, item)
-
-        item = QtWidgets.QTableWidgetItem("CONSIGNACION")
-        item.setTextAlignment(Qt.AlignCenter)
-        item.setFont(font)
-        self.purchase_table.setItem(0, 3, item)
-
-        item = QtWidgets.QTableWidgetItem("F999-9999996")
-        item.setTextAlignment(Qt.AlignCenter)
-        item.setFont(font)
-        self.purchase_table.setItem(0, 4, item)
-
-        self.operationBtn = QPushButton("LIQUIDAR", self)
-        self.operationBtn.setFont(font)
-        self.operationBtn.setEnabled(False)
-        # self.operationBtn.setStyleSheet("background-color: rgb(240, 240, 240);")
-
-        self.pbar = QProgressBar(self)
-        self.pbar.setMaximum(300)
-        self.pbar.setMinimum(0)
-        self.pbar.setFixedWidth(130)
-        self.pbar.setFont(font)
-        self.purchase_table.setCellWidget(0, 6, self.pbar)
-        self.purchase_table.setCellWidget(0, 5, self.operationBtn)
-        # # self.cantidad = 0
-        self.pbar.setValue(300)
+        # self.purchase_table.setRowCount(1)
+        #
+        # font = QtGui.QFont("Open Sans Semibold", pointSize = 10, weight = 60)
+        #
+        # item = QtWidgets.QTableWidgetItem("21/10/2022")
+        # item.setTextAlignment(Qt.AlignCenter)
+        # item.setFont(font)
+        # self.purchase_table.setItem(0, 0, item)
+        #
+        # item = QtWidgets.QTableWidgetItem("STC")
+        # item.setTextAlignment(Qt.AlignCenter)
+        # item.setFont(font)
+        # self.purchase_table.setItem(0, 1, item)
+        #
+        # item = QtWidgets.QTableWidgetItem("VENTAS99")
+        # item.setTextAlignment(Qt.AlignCenter)
+        # item.setFont(font)
+        # self.purchase_table.setItem(0, 2, item)
+        #
+        # item = QtWidgets.QTableWidgetItem("CONSIGNACION")
+        # item.setTextAlignment(Qt.AlignCenter)
+        # item.setFont(font)
+        # self.purchase_table.setItem(0, 3, item)
+        #
+        # item = QtWidgets.QTableWidgetItem("F999-9999996")
+        # item.setTextAlignment(Qt.AlignCenter)
+        # item.setFont(font)
+        # self.purchase_table.setItem(0, 4, item)
+        #
+        # self.operationBtn = QPushButton("LIQUIDAR", self)
+        # self.operationBtn.setFont(font)
+        # self.operationBtn.setEnabled(False)
+        # # self.operationBtn.setStyleSheet("background-color: rgb(240, 240, 240);")
+        #
+        # self.pbar = QProgressBar(self)
+        # self.pbar.setMaximum(300)
+        # self.pbar.setMinimum(0)
+        # self.pbar.setFixedWidth(130)
+        # self.pbar.setFont(font)
+        # self.purchase_table.setCellWidget(0, 6, self.pbar)
+        # self.purchase_table.setCellWidget(0, 5, self.operationBtn)
+        # # # self.cantidad = 0
+        # self.pbar.setValue(300)
 
     def show(self):
         self.init_condition()
@@ -318,6 +319,7 @@ class Ui_Qpurchase(QtWidgets.QDialog):
         self.lblDoc.setPalette(palette)
         self.lblCompanyName.setPalette(palette)
         self.lblSellerName.setPalette(palette)
+
     def change_color_criterio(self):
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(240, 240, 240))
