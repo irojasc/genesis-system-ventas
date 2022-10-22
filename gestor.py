@@ -1,5 +1,5 @@
 import mysql.connector
-from objects import user, customer, ware_book, book, ware_, transferr, saleItem, saleDetailsItem, supplier
+from objects import user, customer, ware_book, book, ware_, transferr, saleItem, saleDetailsItem, supplier, purchase
 from datetime import datetime
 from PyQt5.QtWidgets import QMessageBox
 
@@ -471,7 +471,6 @@ class customer_gestor:
 			self.disconnectDB()
 
 	def addCustomer(self, name: str, doc: str, phone: str):
-
 		try:
 			self.connectDB()
 			query = ("insert into genesisDB.customers (name_, doc_, tel_) values ('" + name + "', '" + doc + "' "
@@ -618,13 +617,54 @@ class supplier_gestor:
 			print("No se puede conectar a genesisDB")
 			self.disconnectDB()
 
-
-
 class documents:
 	def __init__(self):
 		pass
 	def get_PDFReport(self):
 		passs
+
+class purchase_gestor:
+	def __init__(self):
+		self.list_purchases = []
+	def connectDB(self):
+		try:
+			self.mydb = mysql.connector.connect(host="mysql-28407-0.cloudclusters.net", user="admin01",
+												passwd="alayza2213", port="28416")
+			self.cursor = self.mydb.cursor(buffered=True)
+		except:
+			print("No se puede conectar a DB")
+			self.cursor.close()
+			self.mydb.close()
+	def disconnectDB(self):
+		self.cursor.close()
+		self.mydb.close()
+
+	def getPurchasexSupplier(self, supplierCode: str):
+		self.list_purchases.clear()
+		self.connectDB()
+		query = ("select pr.id, pr.user, pr.ware, pr.input_date, pr.serie, pr.type, "
+				 "(select IFNULL(truncate(sum(pd.cant*pd.pc), 2), NULL) "
+				 "from genesisDB.purchaseDetails pd "
+				 "where pd.purchase=pr.id) as sumadeuda, "
+				 "(select sum(py.amount) "
+				 "from genesisDB.purchase_payments as py "
+				 "where py.pur_id=pr.id) as sumapagos "
+				 "from genesisDB.purchases as pr where pr.supplier = '" + supplierCode + "';")
+		try:
+			self.cursor.execute(query)
+			# par1: id, par2: usr, par3: ware, par4: in_date, par5: serie, par6: type, par7: debt, par8: payment
+			filter = lambda x: False if (x == None) else True
+			for (par1, par2, par3, par4, par5, par6, par7, par8) in self.cursor:
+				objPurchase = purchase(par1, par2, par3, str(par4), par5, par6,
+									   float(filter(par7)), float(filter(par8)))
+				self.list_purchases.append(objPurchase)
+			self.disconnectDB()
+		except mysql.connector.Error as err:
+			print("Something went wrong: {}".format(err))
+			print("No se puede conectar a DB")
+			self.disconnectDB()
+
+
 
 
 
