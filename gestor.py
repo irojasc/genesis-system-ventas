@@ -639,7 +639,7 @@ class purchase_gestor:
 		self.cursor.close()
 		self.mydb.close()
 
-	def getPurchasexSupplier(self, supplierCode: str):
+	def getPurchasesxSupplier(self, supplierCode: str):
 		self.list_purchases.clear()
 		self.connectDB()
 		query = ("select pr.id, pr.user, pr.ware, pr.input_date, pr.serie, pr.type, "
@@ -652,8 +652,8 @@ class purchase_gestor:
 				 "from genesisDB.purchases as pr where pr.supplier = '" + supplierCode + "';")
 		try:
 			self.cursor.execute(query)
-			# par1: id, par2: usr, par3: ware, par4: in_date, par5: serie, par6: type, par7: debt, par8: payment
-			filter = lambda x: False if (x == None) else True
+			# par1: id, par2: user, par3: ware, par4: in_date, par5: serie, par6: type, par7: debt, par8: payment
+			filter = lambda x: False if (x == None) else x
 			for (par1, par2, par3, par4, par5, par6, par7, par8) in self.cursor:
 				objPurchase = purchase(par1, par2, par3, str(par4), par5, par6,
 									   float(filter(par7)), float(filter(par8)))
