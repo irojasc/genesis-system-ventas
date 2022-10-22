@@ -142,7 +142,7 @@ class ware_:
 		self.toolTip = toolTip
 
 class purchase:
-	def __init__(self, id: int, user: str, inputDate: str, inputWare: str, tipo: str, serie: str, debt: float, payment: float):
+	def __init__(self, id: int, user: str, inputWare: str, inputDate: str, serie: str, tipo: str, debt: float, payment: float):
 		self.id = id
 		self.user = user
 		self.inputDate = inputDate
