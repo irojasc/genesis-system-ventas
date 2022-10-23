@@ -1,9 +1,10 @@
 
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from gestor import supplier_gestor
+from gestor import supplier_gestor, purchase_gestor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QProgressBar, QPushButton
 from PyQt5.QtCore import Qt, QTimer, QAbstractItemModel
+from PyQt5.QtWidgets import QApplication
 # from PyQt5.QtGui import QFont, QBrush, QColor
 # from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox
 # from PyQt5.QtCore import Qt, QThread, QObject, pyqtSignal
@@ -22,70 +23,90 @@ class Ui_Qpurchase(QtWidgets.QDialog):
     def __init__(self, data_users = None, data_wares = None, parent=None):
         super(Ui_Qpurchase, self).__init__(parent)
         self.supplier_gest = supplier_gestor() #gestor para proveedores
+        self.purchase_gest = purchase_gestor() #gestor para compras
         #
         self.ownUsers = data_users
         self.ownWares = data_wares
         self.setupUi() #configuracion de GUI
+        #
+        #declaracion de variables locales o de clase
+        self.purchase_list = []
 
     def updateTable(self):
-        pass
+        self.purchase_table.blockSignals(True)
+        self.purchase_list.clear()
+        self.purchase_table.clearContents()
+        flag1 = QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
+        flag = QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
+        self.purchase_list = self.purchase_gest.list_purchases.copy()
+        # -----------  esta parte para llenar la tabla  -----------
+        row = 0
+        self.purchase_table.setRowCount(len(self.purchase_list))
+        font = QtGui.QFont("Open Sans Semibold", pointSize=10, weight=60)
 
-        # self.purchase_table.setRowCount(1)
-        #
-        # font = QtGui.QFont("Open Sans Semibold", pointSize = 10, weight = 60)
-        #
-        # item = QtWidgets.QTableWidgetItem("21/10/2022")
-        # item.setTextAlignment(Qt.AlignCenter)
-        # item.setFont(font)
-        # self.purchase_table.setItem(0, 0, item)
-        #
-        # item = QtWidgets.QTableWidgetItem("STC")
-        # item.setTextAlignment(Qt.AlignCenter)
-        # item.setFont(font)
-        # self.purchase_table.setItem(0, 1, item)
-        #
-        # item = QtWidgets.QTableWidgetItem("VENTAS99")
-        # item.setTextAlignment(Qt.AlignCenter)
-        # item.setFont(font)
-        # self.purchase_table.setItem(0, 2, item)
-        #
-        # item = QtWidgets.QTableWidgetItem("CONSIGNACION")
-        # item.setTextAlignment(Qt.AlignCenter)
-        # item.setFont(font)
-        # self.purchase_table.setItem(0, 3, item)
-        #
-        # item = QtWidgets.QTableWidgetItem("F999-9999996")
-        # item.setTextAlignment(Qt.AlignCenter)
-        # item.setFont(font)
-        # self.purchase_table.setItem(0, 4, item)
-        #
-        # self.operationBtn = QPushButton("LIQUIDAR", self)
-        # self.operationBtn.setFont(font)
-        # self.operationBtn.setEnabled(False)
-        # # self.operationBtn.setStyleSheet("background-color: rgb(240, 240, 240);")
-        #
-        # self.pbar = QProgressBar(self)
-        # self.pbar.setMaximum(300)
-        # self.pbar.setMinimum(0)
-        # self.pbar.setFixedWidth(130)
-        # self.pbar.setFont(font)
-        # self.purchase_table.setCellWidget(0, 6, self.pbar)
-        # self.purchase_table.setCellWidget(0, 5, self.operationBtn)
-        # # # self.cantidad = 0
-        # self.pbar.setValue(300)
+        for p in self.purchase_list:
+            item = QtWidgets.QTableWidgetItem(p.inputDate)
+            item.setFlags(flag)
+            item.setTextAlignment(Qt.AlignCenter)
+            item.setFont(font)
+            self.purchase_table.setItem(row, 0, item)
+            #
+            item = QtWidgets.QTableWidgetItem(p.inputWare)
+            item.setFlags(flag)
+            item.setTextAlignment(Qt.AlignCenter)
+            item.setFont(font)
+            self.purchase_table.setItem(row, 1, item)
+            #
+            item = QtWidgets.QTableWidgetItem(p.user)
+            item.setFlags(flag)
+            item.setTextAlignment(Qt.AlignCenter)
+            item.setFont(font)
+            self.purchase_table.setItem(row, 2, item)
+            #
+            item = QtWidgets.QTableWidgetItem(p.type)
+            item.setFlags(flag)
+            item.setTextAlignment(Qt.AlignCenter)
+            item.setFont(font)
+            self.purchase_table.setItem(row, 3, item)
+            #
+            item = QtWidgets.QTableWidgetItem(p.serie)
+            item.setFlags(flag1)
+            item.setTextAlignment(Qt.AlignCenter)
+            item.setFont(font)
+            self.purchase_table.setItem(row, 4, item)
+            #
+            if p.type == "CREDITO":
+                itemBtn = QPushButton("PAGAR")
+                itemBtn.clicked.connect(self.btnCellClicked)
+                itemBtn.setFont(font)
+                self.purchase_table.setCellWidget(row, 5, itemBtn)
+            #
+            pbar = QProgressBar()
+            tmp_val = round((p.payment/p.debt)*100)
+            pbar.setFixedWidth(130)
+            pbar.setFont(font)
+            pbar.setValue(tmp_val)
+            self.purchase_table.setCellWidget(row, 6, pbar)
+            row += 1
+        self.purchase_table.blockSignals(False)
+
+    def consultar(self):
+        self.top_frame.setEnabled(False)
+        self.purchase_gest.getPurchasesxSupplier(self.txtBusqueda.text().split("|")[4].strip())
+        self.updateTable()
 
     def show(self):
         self.init_condition()
         self.open()
 
     def init_condition(self):
+        self.btnConsultar.setEnabled(False)
         self.updateQcompleter()
         self.txtBusqueda.clear()
         self.txtDoc.clear()
         self.txtCompanyName.clear()
         self.txtSeller.clear()
         self.purchase_table.clearContents()
-        # self.updateTable()
 
     def introSupplier(self, selectedOption):
         if len(self.txtBusqueda.text().split("|")) > 1:
@@ -101,6 +122,11 @@ class Ui_Qpurchase(QtWidgets.QDialog):
             self.txtDoc.clear()
             self.txtCompanyName.clear()
             self.txtSeller.clear()
+            self.purchase_table.setRowCount(0)
+        if len(self.txtBusqueda.text().split("|")) == 5:
+            self.btnConsultar.setEnabled(True)
+        else:
+            self.btnConsultar.setEnabled(False)
 
     def updateQcompleter(self):
         supplier_list = []
@@ -112,15 +138,37 @@ class Ui_Qpurchase(QtWidgets.QDialog):
         model.removeRows(0, model.rowCount())
         model.setStringList(supplier_list)
 
+    def activateTopFrame(self, event):
+        self.top_frame.setEnabled(True)
+
+    def btnCellClicked(self):
+        # find what is clicked
+        clicked = QApplication.focusWidget()
+        # position
+        # idx = self.purchase_table.indexAt(clicked.pos())
+        idx = self.purchase_table.indexAt(clicked.pos())
+        # item.clicked.connect(lambda: print("Hola Mundo"))
+        print(idx.row())
+
+    def itemContentChanged(self, item):
+        if item.column() == 4:
+            self.purchase_gest.updateSerie(item.text(), self.purchase_list[item.row()].id)
+
     def setupUi(self):
         self.setObjectName("QpurchaseDialog")
         self.resize(widgetWidth, widgetHeight)
         self.setFixedSize(widgetWidth, widgetHeight)
+
         # -----------  top frame configuration  -----------
         self.top_frame = QtWidgets.QFrame(self)
         self.top_frame.setGeometry(QtCore.QRect(0, 0, widgetWidth, 145)) #width 640, height 95
         self.top_frame.setStyleSheet("background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0.298507 rgba(83, 97, 142, 255), stop:1 rgba(97, 69, 128, 255));")
         self.top_frame.setObjectName("top_frame")
+
+        self.tmp_frame = QtWidgets.QFrame(self)
+        self.tmp_frame.setGeometry(QtCore.QRect(0, 110, widgetWidth - 160, 35))  # width 640, height 95
+        self.tmp_frame.setStyleSheet("background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0.298507 rgba(83, 97, 142, 0), stop:1 rgba(97, 69, 128, 0));")
+        self.tmp_frame.mousePressEvent = self.activateTopFrame
 
         # # -----------  groupBox configuration  -----------
         self.gbSuppliers = QtWidgets.QGroupBox(self.top_frame)
@@ -213,7 +261,7 @@ class Ui_Qpurchase(QtWidgets.QDialog):
         font = QtGui.QFont("Open Sans Semibold", pointSize=11, weight=75)
         self.btnConsultar.setFont(font)
         self.btnConsultar.setStyleSheet("background-color: rgb(240, 240, 240);")
-        # self.btnConsultar.clicked.connect([self.sindefinir])
+        self.btnConsultar.clicked.connect(self.consultar)
         #
         # -----------  in_tableWidget  -----------
         self.purchase_table = QtWidgets.QTableWidget(self)
@@ -238,6 +286,7 @@ class Ui_Qpurchase(QtWidgets.QDialog):
         self.purchase_table.setSelectionMode(1)
         self.purchase_table.setSelectionBehavior(1)
         self.purchase_table.horizontalHeader().setEnabled(False)
+        self.purchase_table.itemChanged.connect(self.itemContentChanged)
         #
         self.change_color_lbltitle()
         self.change_color_criterio()
