@@ -664,6 +664,21 @@ class purchase_gestor:
 			print("No se puede conectar a DB")
 			self.disconnectDB()
 
+	def updateSerie(self, serie: str, id: int):
+		self.connectDB()
+		query = ("update genesisDB.purchases set serie = '"+ serie[:14] +"' where id = " + str(id) + ";")
+		try:
+			self.cursor.execute(query)
+			self.mydb.commit()
+			self.disconnectDB()
+			return True
+		except mysql.connector.Error as err:
+			print("Something went wrong: {}".format(err))
+			print("No se puede conectar a DB")
+			self.disconnectDB()
+			return False
+
+
 
 
 
