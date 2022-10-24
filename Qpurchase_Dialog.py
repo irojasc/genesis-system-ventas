@@ -3,13 +3,8 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from gestor import supplier_gestor, purchase_gestor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QProgressBar, QPushButton
-from PyQt5.QtCore import Qt, QTimer, QAbstractItemModel
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QApplication
-# from PyQt5.QtGui import QFont, QBrush, QColor
-# from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox
-# from PyQt5.QtCore import Qt, QThread, QObject, pyqtSignal
-# from PyQt5.QtWidgets import *
-# from gestor import ware_gestor, transfer
 
 
 widgetHeight = 500
@@ -146,13 +141,26 @@ class Ui_Qpurchase(QtWidgets.QDialog):
         clicked = QApplication.focusWidget()
         # position
         # idx = self.purchase_table.indexAt(clicked.pos())
-        idx = self.purchase_table.indexAt(clicked.pos())
+        row = self.purchase_table.indexAt(clicked.pos()).row()
         # item.clicked.connect(lambda: print("Hola Mundo"))
-        print(idx.row())
+        ##aca se va revisar si en caso se pago de otro lado, recomendable que lo haga un user
+        availableDebt = self.purchase_list[row].debt - self.purchase_list[row].payment
+        paymentUI = Ui_Qdopayment(self.ownUsers, availableDebt)
+        if  paymentUI.exec_() == QtWidgets.QDialog.Accepted:
+            pass
+            # print("Hola Mundo")
+            # self.setEnabled(True)
+            # self.isopenware = False
+            # self.isupdateWare = False
+            # print(idx.row())
 
     def itemContentChanged(self, item):
         if item.column() == 4:
             self.purchase_gest.updateSerie(item.text(), self.purchase_list[item.row()].id)
+
+    def keyPressEvent(self, event):
+        if not event.key() == QtCore.Qt.Key_Escape:
+            super(Ui_Qdopayment, self).keyPressEvent(event)
 
     def setupUi(self):
         self.setObjectName("QpurchaseDialog")
@@ -447,6 +455,42 @@ class Ui_Qpurchase(QtWidgets.QDialog):
         font.setBold(True)
         self.gbSuppliers.setPalette(palette)
         self.gbSuppliers.setFont(font)
+
+
+
+class Ui_Qdopayment(QtWidgets.QDialog):
+    def __init__(self, data_users = None, availableDebt = 0.0, parent=None):
+        super(Ui_Qdopayment, self).__init__(parent)
+        #
+        self.ownUsers = data_users
+        self.setupUi() #configuracion de GUI
+        #
+        #localvariables
+        self.currentDebt = availableDebt
+        #initfunctions
+        self.initConditions()
+    def closeEvent(self, event):
+        self.accept()
+        event.accept()
+
+    def keyPressEvent(self, event):
+        if not event.key() == QtCore.Qt.Key_Escape:
+            super(Ui_Qdopayment, self).keyPressEvent(event)
+        else:
+            self.accept()
+            event.accept()
+
+    def initConditions(self):
+        self.lblDeuda = QtWidgets.QLabel(self)
+        self.lblDeuda.setGeometry(QtCore.QRect(10, 25, 150, 31))
+        font = QtGui.QFont("Open Sans Semibold", pointSize = 12, weight = 65)
+        self.lblDeuda.setFont(font)
+        self.lblDeuda.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
+        self.lblDeuda.setText("Deuda: " + str(self.currentDebt))
+
+    def setupUi(self):
+        self.setObjectName("Ui_Qdopayment")
+        self.setFixedSize(410, 150)
 
 
 if __name__ == "__main__":
