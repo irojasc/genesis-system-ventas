@@ -11,7 +11,7 @@ class wares_gestor:
 
 	def connectDB(self):
 		try:
-			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="SantaAncha123", port="28416")
 			self.cursor = self.mydb.cursor()
 		except:
 			print("No se puede conectar a genesisDB")
@@ -90,7 +90,7 @@ class ware_gestor:
 		self.temp_list = []
 	
 	def connect_db(self):
-		self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+		self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="SantaAncha123", port="28416")
 		self.cursor = self.mydb.cursor()
 
 	def disconnect_db(self):
@@ -213,7 +213,7 @@ class transfer:
 		pass
 
 	def connect_db(self):
-		self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+		self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="SantaAncha123", port="28416")
 		self.cursor = self.mydb.cursor()
 
 	def disconnect_db(self):
@@ -257,7 +257,7 @@ class notifications:
 		self.trasfer_list = []
 
 	def connect_db(self):
-		self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+		self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="SantaAncha123", port="28416")
 		self.cursor = self.mydb.cursor()
 
 	def disconnect_db(self):
@@ -387,7 +387,7 @@ class users_gestor:
 		self.users = []
 		self.fill_users()
 		#try:
-		#	self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+		#	self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="SantaAncha123", port="28416")
 		#	self.cursor = self.mydb.cursor()
 		#except:
 		#	self.cursor.close()
@@ -395,7 +395,7 @@ class users_gestor:
 
 	def connectDB(self):
 		try:
-			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="SantaAncha123", port="28416")
 			self.cursor = self.mydb.cursor()
 		except:
 			print("No se puede conectar a genesisDB")
@@ -443,7 +443,7 @@ class customer_gestor:
 
 	def connectDB(self):
 		try:
-			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="SantaAncha123", port="28416")
 			self.cursor = self.mydb.cursor()
 		except:
 			print("No se puede conectar a genesisDB")
@@ -492,7 +492,7 @@ class sales_gestor:
 			pass
 	def connectDB(self):
 		try:
-			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="SantaAncha123", port="28416")
 			self.cursor = self.mydb.cursor()
 		except:
 			print("No se puede conectar a genesisDB")
@@ -591,7 +591,7 @@ class supplier_gestor:
 		self.suppliers = []
 	def connectDB(self):
 		try:
-			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="SantaAncha123", port="28416")
 			self.cursor = self.mydb.cursor(buffered=True)
 		except:
 			print("No se puede conectar a genesisDB")
@@ -629,7 +629,7 @@ class purchase_gestor:
 	def connectDB(self):
 		try:
 			self.mydb = mysql.connector.connect(host="mysql-28407-0.cloudclusters.net", user="admin01",
-												passwd="alayza2213", port="28416")
+												passwd="SantaAncha123", port="28416")
 			self.cursor = self.mydb.cursor(buffered=True)
 		except:
 			print("No se puede conectar a DB")

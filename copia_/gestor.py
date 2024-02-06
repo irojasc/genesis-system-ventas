@@ -1,5 +1,5 @@
 import mysql.connector
-from objects import user, customer, ware_book, book, ware_, transferr, saleItem, saleDetailsItem
+from objects import user, customer, ware_book, book, ware_, transferr, saleItem, saleDetailsItem, supplier, purchase
 from datetime import datetime
 from PyQt5.QtWidgets import QMessageBox
 
@@ -49,11 +49,12 @@ class wares_gestor:
 			vect = file.readlines()
 			self.abrev = vect[0].split(":")[1].strip('\n')
 			ware_name = vect[1].split(":")[1].strip('\n')
+			ware_inputLoc = bool(vect[1].split(":")[2].strip('\n'))
 			for i in self.wares:
 				if i.cod == self.abrev:
 					file.close()
 					self.sort_ware()
-					return True, (i.cod, self.wares, (i.enabled, i.toolTip)), ware_name
+					return True, (i.cod, self.wares, (i.enabled, i.toolTip, ware_inputLoc)), ware_name
 			file.close()
 			return False, None, "UNKNOWN"
 		except:
@@ -407,14 +408,22 @@ class users_gestor:
 
 	def fill_users(self):
 		self.connectDB()
-		query = ("use genesisDB;")
-		query1 = ("select * from users;")
+		query = ("CREATE TEMPORARY TABLE genesisDB.tmp "
+				 "AS select * from genesisDB.users "
+				 "inner join genesisDB.user_flags "
+				 "on genesisDB.users.level = genesisDB.user_flags.lvl;")
+		query_1 = ("ALTER TABLE genesisDB.tmp DROP COLUMN id, DROP COLUMN level, DROP COLUMN lvl;")
+		query_2 = ("SELECT * FROM genesisDB.tmp;")
 		try:
 			self.cursor.execute(query)
-			self.cursor.execute(query1)
-			#param2: usr, param3: pssswd, param4: name, param5: doc, param6: phone, param7: enabled
-			for (param1, param2, param3, param4, param5, param6, param7) in self.cursor:
-				objUser = user(param2, param3, param4, param5, param6, bool(param7))
+			self.cursor.execute(query_1)
+			self.cursor.execute(query_2)
+			#param1, param2, param3, param4, param5, param6 -> datos propios (usr, pwd, name, doc, phone, enabled)
+			#param7, param8, param9, param10, param11, param12 -> permisos (vender, comprar, registrar compra,
+			# verProve, comparar, transferir)
+			for (par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12) in self.cursor:
+				objUser = user(par1, par2, par3, par4, par5, bool(par6), (bool(par7), bool(par8), bool(par9), bool(par10),
+																		  bool(par11), bool(par12)))
 				self.users.append(objUser)
 			self.disconnectDB()
 		except:
@@ -424,8 +433,8 @@ class users_gestor:
 	def check_login(self, name, passwd):
 		for i in self.users:
 			if i.user == name and i.passwd == passwd:
-				return True, (i.user, self.users, i.enabled)
-		return False, (i.user, self.users, False)
+				return True, (i.user, self.users, i.enabled, i.flags)
+		return False, (i.user, self.users, False, None)
 
 class customer_gestor:
 	def __init__(self, flag = False):
@@ -462,7 +471,6 @@ class customer_gestor:
 			self.disconnectDB()
 
 	def addCustomer(self, name: str, doc: str, phone: str):
-
 		try:
 			self.connectDB()
 			query = ("insert into genesisDB.customers (name_, doc_, tel_) values ('" + name + "', '" + doc + "' "
@@ -497,7 +505,7 @@ class sales_gestor:
 	def loadSalesDetails(self, currentWare = "", date = ""):
 		self.sales.clear()
 		self.connectDB()
-		query = ("select id_,genesisDB.salesDetails.id,cod,isbn,name,name_,usr_,cant,genesisDB.salesDetails.credit_,receipt_,total "
+		query = ("select id_,genesisDB.salesDetails.id,cod,isbn,name,name_,doc_,usr_,cant,genesisDB.salesDetails.credit_,receipt_,total "
 				 "from genesisDB.salesDetails "
 				 "inner join genesisDB.books on genesisDB.salesDetails.codBook = genesisDB.books.cod "
 				 "inner join genesisDB.customers on genesisDB.salesDetails.cust_ = genesisDB.customers.id "
@@ -505,8 +513,9 @@ class sales_gestor:
 				 "where date_ = '" + date + "' and ware_ = '" + currentWare + "' order by id asc;")
 		try:
 			self.cursor.execute(query)
-			for (param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11) in self.cursor:
-				objDetailItems = saleDetailsItem(param1, param2, param3, str(param4), param5, param6, param7, param8, param9, param10, float(param11))
+			##param6: nombre de usuario, param7: doc
+			for (param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12) in self.cursor:
+				objDetailItems = saleDetailsItem(param1, param2, param3, str(param4), param5, param6, str(param7), param8, param9, param10, param11, float(param12))
 				self.sales.append(objDetailItems)
 			self.disconnectDB()
 		except mysql.connector.Error as err:
@@ -577,11 +586,100 @@ class sales_gestor:
 			self.disconnectDB()
 			return False
 
+class supplier_gestor:
+	def __init__(self):
+		self.suppliers = []
+	def connectDB(self):
+		try:
+			self.mydb = mysql.connector.connect(host = "mysql-28407-0.cloudclusters.net", user="admin01", passwd="alayza2213", port="28416")
+			self.cursor = self.mydb.cursor(buffered=True)
+		except:
+			print("No se puede conectar a genesisDB")
+			self.cursor.close()
+			self.mydb.close()
+	def disconnectDB(self):
+		self.cursor.close()
+		self.mydb.close()
+
+	def fill_suppliers(self):
+		self.suppliers.clear()
+		self.connectDB()
+		query = ("select * from genesisDB.suppliers;")
+		try:
+			self.cursor.execute(query)
+			# # param2: usr, param3: pssswd, param4: name, param5: doc, param6: phone, param7: enabled
+			for (param1, param2, param3, param4, param5, param6, param7, param8, param9) in self.cursor:
+				objSupplier = supplier(param1, param2, param3, param4, param5, param6, param7, param8, param9)
+				self.suppliers.append(objSupplier)
+			self.disconnectDB()
+		except mysql.connector.Error as err:
+			print("Something went wrong: {}".format(err))
+			print("No se puede conectar a genesisDB")
+			self.disconnectDB()
+
 class documents:
 	def __init__(self):
 		pass
 	def get_PDFReport(self):
-		pass
+		passs
+
+class purchase_gestor:
+	def __init__(self):
+		self.list_purchases = []
+	def connectDB(self):
+		try:
+			self.mydb = mysql.connector.connect(host="mysql-28407-0.cloudclusters.net", user="admin01",
+												passwd="alayza2213", port="28416")
+			self.cursor = self.mydb.cursor(buffered=True)
+		except:
+			print("No se puede conectar a DB")
+			self.cursor.close()
+			self.mydb.close()
+	def disconnectDB(self):
+		self.cursor.close()
+		self.mydb.close()
+
+	def getPurchasesxSupplier(self, supplierCode: str):
+		self.list_purchases.clear()
+		self.connectDB()
+		query = ("select pr.id, pr.user, pr.ware, pr.input_date, pr.serie, pr.type, "
+				 "(select IFNULL(truncate(sum(pd.cant*pd.pc), 2), NULL) "
+				 "from genesisDB.purchaseDetails pd "
+				 "where pd.purchase=pr.id) as sumadeuda, "
+				 "(select sum(py.amount) "
+				 "from genesisDB.purchase_payments as py "
+				 "where py.pur_id=pr.id) as sumapagos "
+				 "from genesisDB.purchases as pr where pr.supplier = '" + supplierCode + "';")
+		try:
+			self.cursor.execute(query)
+			# par1: id, par2: user, par3: ware, par4: in_date, par5: serie, par6: type, par7: debt, par8: payment
+			filter = lambda x: False if (x == None) else x
+			for (par1, par2, par3, par4, par5, par6, par7, par8) in self.cursor:
+				objPurchase = purchase(par1, par2, par3, str(par4), par5, par6,
+									   float(filter(par7)), float(filter(par8)))
+				self.list_purchases.append(objPurchase)
+			self.disconnectDB()
+		except mysql.connector.Error as err:
+			print("Something went wrong: {}".format(err))
+			print("No se puede conectar a DB")
+			self.disconnectDB()
+
+	def updateSerie(self, serie: str, id: int):
+		self.connectDB()
+		query = ("update genesisDB.purchases set serie = '"+ serie[:14] +"' where id = " + str(id) + ";")
+		try:
+			self.cursor.execute(query)
+			self.mydb.commit()
+			self.disconnectDB()
+			return True
+		except mysql.connector.Error as err:
+			print("Something went wrong: {}".format(err))
+			print("No se puede conectar a DB")
+			self.disconnectDB()
+			return False
+
+
+
 
 
 

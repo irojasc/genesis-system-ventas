@@ -16,9 +16,11 @@ from gestor import users_gestor, wares_gestor, notifications
 from datetime import datetime
 from ware_dialog import Ui_Dialog
 from sales_Dialog import sales_Dialog
+from Qpurchase_Dialog import Ui_Qpurchase
 import threading
 import time
 import pyautogui
+
 
 enable_datetime = True
 
@@ -39,16 +41,19 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # ----- Creas objeto Qdialog para almacen----- #
         self.dialog_ = QDialog()
         self.ui_dialog = Ui_Dialog(data_user, data_ware, self.dialog_)
+        #
         # ----- Creas objeto Qdialog para ventas ----- #
         self.dialog = QDialog()
         self.sales_dialog = sales_Dialog(data_user, data_ware, self.dialog)
+        #
+        # ----- Creas objeto Qdialog para ventas ----- #
+        self.purchase_dialog = Ui_Qpurchase(data_user, data_ware)
 
         self.setupUi()
         self.init_conditions()
         self.isopenware = False
         self.isupdate = False
         self.isupdateWare = False
-        #self.ui_dialog.init_condition()
 
     def doubleClickItem(self, item):
         row = item.row()
@@ -209,6 +214,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.sales_dialog.widget.setCurrentIndex(0)
         self.sales_dialog.widget.show()
 
+    def openPurchaseWindow(self):
+        self.purchase_dialog.show()
 
     def setupUi(self):
         width, height = pyautogui.size()
@@ -237,8 +244,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.Reportes.setObjectName("Reportes")
         self.setMenuBar(self.menubar)
 
-        self.Compras = QtWidgets.QAction(self)
-        self.Compras.setObjectName("Compras")
+        self.CompraR = QtWidgets.QAction(self)
+        self.CompraR.setObjectName("CompraRapida")
         self.VentasD = QtWidgets.QAction(self)
         self.VentasD.setObjectName("VentasD")
         self.ConsignacionR = QtWidgets.QAction(self)
@@ -249,7 +256,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.ClientesR.setObjectName("ClientesR")
         self.ProveedoresR = QtWidgets.QAction(self)
         self.ProveedoresR.setObjectName("ProveedoresR")
-        self.Ingresos.addAction(self.Compras)
+        self.Ingresos.addAction(self.CompraR)
         self.Salidas.addAction(self.VentasD)
         self.Reportes.addAction(self.ConsignacionR)
         self.Reportes.addAction(self.VentasR)
@@ -263,6 +270,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         # -----------  Triggered para QAction -----------
         self.VentasD.triggered.connect(self.open_salesWindow)
+        #
+        # -----------  Triggered para abrir QPurchaseDialog -----------
+        self.CompraR.triggered.connect(self.openPurchaseWindow)
 
         # -----------  top frame configuration  -----------
         self.frame = QtWidgets.QFrame(self)
@@ -362,15 +372,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         k = 0
         while(enable_datetime):
             self.date_label.setText(datetime.now().strftime("%H:%M %d/%m/%Y"))
-            # if self.sales_dialog.widget.isVisible():
-            #     print("ventana de ventas abierto")
-            # elif not self.sales_dialog.widget.isVisible():
-            #     print("ventana de ventas cerrado")
-            if self.sales_dialog.isVisible() or self.sales_dialog.ui_dialog_.isVisible() or self.sales_dialog.cust_dialog_.isVisible():
+            if self.sales_dialog.isVisible() or self.sales_dialog.ui_dialog_.isVisible() or \
+                    self.sales_dialog.cust_dialog_.isVisible():
                 self.setEnabled(False)
-            else:
+            elif not self.sales_dialog.widget.isVisible():
                 self.setEnabled(True)
-
             if k < 600:
                 time.sleep(0.5)
                 k += 1
@@ -398,7 +404,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.Ingresos.setTitle(_translate("MainWindow", "Ingresos"))
         self.Salidas.setTitle(_translate("MainWindow", "Salidas"))
         self.Reportes.setTitle(_translate("MainWindow", "Reportes"))
-        self.Compras.setText(_translate("MainWindow", "Compras"))
+        self.CompraR.setText(_translate("MainWindow", "Compra Rapida"))
         self.VentasD.setText(_translate("MainWindow", "Ventas"))
         self.ConsignacionR.setText(_translate("MainWindow", "Compras"))
         self.VentasR.setText(_translate("MainWindow", "Ventas"))

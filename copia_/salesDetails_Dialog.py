@@ -636,8 +636,12 @@ class sales_details(QtWidgets.QDialog):
         self.txtCliente.setStyleSheet("background-color: rgb(170, 255, 0);")
         self.txtCliente.setClearButtonEnabled(True)
         self.txtCliente.setObjectName("txtCliente")
+        self.validator = Validator(self)
         completer = QCompleter(self.model, self)
+        completer.setFilterMode(Qt.MatchContains)
+        self.txtCliente.setValidator(self.validator)
         self.txtCliente.setCompleter(completer)
+        # self.txtCliente.setInputMethodHints(Qt::ImhUppercaseOnly)
         # self.txtCliente.textChanged.connect(self.txtBusquedaChanged) #ultimas variaciones
         # self.txtCliente.keyPressEvent = self.txtbusquedaAcept  #ultimas variaciones
 
@@ -778,3 +782,8 @@ class sales_details(QtWidgets.QDialog):
         self.change_color_lbltitle()
         self.change_color_criterio()  # funcion que cambia color y fuente de gbCriterio
         self.retranslateUi()
+
+
+class Validator(QtGui.QValidator):
+    def validate(self, string, pos):
+        return QtGui.QValidator.Acceptable, string.upper(), pos

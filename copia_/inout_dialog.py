@@ -52,6 +52,7 @@ class Ui_inoutDialog(QtWidgets.QDialog):
         self.searchList.clear()
 
     def add_item(self, cod = ""):
+        highlightRow = 0
         #main_table es lista para manejar los datos qtablewidget
         #index_ igual a None si no ecuentra coincidcnias
         index_ = next((index for (index, d) in enumerate(self.mainList) if d.objBook.cod == cod), None)
@@ -60,21 +61,22 @@ class Ui_inoutDialog(QtWidgets.QDialog):
             data = {"cod": self.mainList[index_].objBook.cod, "isbn": self.mainList[index_].objBook.isbn, "name": self.mainList[index_].objBook.name, "cantidad": 1,
                     "ubic_" + self.ownWares[0]: self.mainList[index_].almacen_data["ubic_" + self.ownWares[0]]}
             self.main_table.append(data)
-            self.updateTotalItems()
+            highlightRow = 0
         else:
             #_tmpObject = copy.copy(object_)
             #data = {"cod": _tmpObject.book.cod, "isbn": _tmpObject.book.isbn, "name": _tmpObject.book.name, "cantidad": _tmpObject.almacen_quantity[0]}
-            for item in self.main_table:
+            for pos, item in enumerate(self.main_table):
                 if item["cod"] == cod:
                     flag = True
-                    item["cantidad"] += 1 
+                    item["cantidad"] += 1
+                    highlightRow = pos
             if flag == False:
                 data = {"cod": self.mainList[index_].objBook.cod, "isbn": self.mainList[index_].objBook.isbn,
                         "name": self.mainList[index_].objBook.name, "cantidad": 1, "ubic_" + self.ownWares[0]: self.mainList[index_].almacen_data["ubic_" + self.ownWares[0]]}
                 self.main_table.append(data)
+                highlightRow = len(self.main_table) - 1
         self.update_table()
-        if len(self.main_table) == 1:
-            self.in_tableWidget.setCurrentCell(0, 0)
+        self.in_tableWidget.setCurrentCell(highlightRow, 0)
         self.updateTotalItems()
 
     def update_table(self):
@@ -636,5 +638,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     Dialog = QDialog()
     ui = Ui_inoutDialog(Dialog)
-    #ui.show_window()
+    # ui.show_window()
     sys.exit(app.exec_())

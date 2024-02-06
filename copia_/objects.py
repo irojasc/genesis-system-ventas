@@ -1,11 +1,12 @@
 class user:
-	def __init__(self, user = "", passwd = "", name = "", doc = "", phone = "", enabled = False):
-		self.user = user
+	def __init__(self, user = "", passwd = "", name = "", doc = "", phone = "", enabled = False, flags = None):
+		self.user = user #este es el codigo
 		self.passwd = passwd
 		self.name = name
 		self.doc = doc
 		self.phone = phone
 		self.enabled = enabled
+		self.flags = flags
 
 class customer:
 	def __init__(self, id = None, name = "", doc = "", tel = "", dir = "", gen = "", sex = 0):
@@ -18,14 +19,16 @@ class customer:
 		self.sex = sex
 
 class supplier:
-	def __init__(self, id, name, admin, phone, direction, mail):
-		self.id = id
+	def __init__(self, cod: str, main_doc: str, name: str, name_admin: str, doc_admin: str, phone: str, direction: str, mail: str, tipo: str):
+		self.cod = cod
+		self.main_doc = main_doc
 		self.name = name
-		self.register = register
-		self.admin = admin
+		self.name_admin = name_admin
+		self.doc_admin = doc_admin
 		self.phone = phone
 		self.direction = direction
 		self.mail = mail
+		self.tipo = tipo
 
 class gender:
 	def __init__(self, id, name):
@@ -56,19 +59,14 @@ class saleItem:
 		self.cantWare = cantWare
 
 class saleDetailsItem:
-	def __init__(self, id_, id, codbook, isbn, title, customer, user, cant, credit = False, receipt = "", total = 0.0):
+	def __init__(self, id_, id, codbook, isbn, title, customer, doc_, user, cant, credit = False, receipt = "", total = 0.0):
 		self.id_ = id_ #int primary
 		self.id = id #int day
 		self.codbook = codbook
 		self.isbn = isbn
 		self.title = title  # string
-		print(customer)
-		#if len(customer.split(" ")) > 1:
-		#	self.customer = customer.split(" ")[2] #string
-		if len(customer.split(" ")) == 2:
-			self.customer = customer.split(" ")[0]  # string
-		else:
-			self.customer = "DESCONOCIDO"
+		self.doc_ = doc_
+		self.customer = customer
 		self.user = user #string
 		self.cant = cant #int
 		self.credit = bool(credit) #bool
@@ -143,7 +141,13 @@ class ware_:
 		self.enabled = enabled
 		self.toolTip = toolTip
 
-
-
-
-
+class purchase:
+	def __init__(self, id: int, user: str, inputWare: str, inputDate: str, serie: str, tipo: str, debt: float, payment: float):
+		self.id = id
+		self.user = user
+		self.inputDate = inputDate
+		self.inputWare = inputWare
+		self.serie = serie
+		self.type = tipo
+		self.debt = debt
+		self.payment = payment
